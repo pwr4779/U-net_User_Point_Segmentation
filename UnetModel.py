@@ -58,19 +58,27 @@ def UNet():
     return model
 
 if __name__ == "__main__":
+    os.environ["CUDA_DEVICE_ORDER"]="PCI_BUS_ID"
+    os.environ["CUDA_VISIBLE_DEVICES"]="4"
     dirNames = glob.glob('/tmp/pycharm_project_368/DAVIS/Annotations/Point/*')
     length = len(dirNames)
-    h = int(length*8/10)
 
     #Train
     trainMask = []
     trainImg = []
     trainPoint = []
-    for i in range(h):
+
+    # valid
+    validMask = []
+    validImg = []
+    validPoint = []
+
+    for i in range(length):
         path = dirNames[i]
         trainPointNames = glob.glob(path + "/*")
         trainPointNames.sort()
-        for j in range(len(trainPointNames)):
+        m=int(len(trainPointNames)*8/10)
+        for j in range(0, m):
             trainPoint.append(trainPointNames[j])
             Imgpath = trainPointNames[j].replace('/Annotations', '/JPEGImages')
             Imgpath = Imgpath.replace('/Point', '/480p')
@@ -78,36 +86,21 @@ if __name__ == "__main__":
             trainImg.append(Imgpath)
             maskpath = trainPointNames[j].replace('/Point','/480p')
             trainMask.append(maskpath)
-
-    #valid
-    validMask = []
-    validImg = []
-    validPoint = []
-    for k in range(h,length):
-        path = dirNames[k]
-        validPointNames = glob.glob(path + "/*")
-        validPointNames.sort()
-        for j in range(len(validPointNames)):
-            validPoint.append(validPointNames[j])
-            Imgpath = validPointNames[j].replace('/Annotations', '/JPEGImages')
+        for j in range(m, len(trainPointNames)):
+            validPoint.append(trainPointNames[j])
+            Imgpath = trainPointNames[j].replace('/Annotations', '/JPEGImages')
             Imgpath = Imgpath.replace('/Point', '/480p')
             Imgpath = Imgpath.replace('.png', '.jpg')
             validImg.append(Imgpath)
-            maskpath = validPointNames[j].replace('/Point', '/480p')
+            maskpath = trainPointNames[j].replace('/Point', '/480p')
             validMask.append(maskpath)
 
-    # print(trainMask)
-    # print(trainImg)
-    # print(trainPoint)
-    # print(validMask)
-    # print(validImg)
-    # print(validPoint)
-    #
     train_x = np.zeros((len(trainImg),288,480, 4))
     valid_x = np.zeros((len(validImg),288,480, 4))
     train_mask_y = np.zeros((len(trainMask),288,480))
     valid_mask_y = np.zeros((len(validMask),288,480))
 
+    #입력(이미지,Point정보) 288*480 형태로 resize 후 4차원으로 만들기
     #train
     for index in range(len(trainImg)):
         mask = cv2.imread(trainMask[index], cv2.IMREAD_GRAYSCALE)
@@ -137,17 +130,18 @@ if __name__ == "__main__":
         valid_x[index, :, :, 0:3] = vimg
         valid_x[index, :, :, 3] = valid_Point
         valid_mask_y[index,:,:] = vmask
+
     train_x = train_x.reshape(len(train_x), 288, 480, 4).astype('float32')/255.0
     valid_x = valid_x.reshape(len(valid_x), 288, 480, 4).astype('float32')/255.0
     train_mask_y = train_mask_y.reshape(len(train_mask_y), 288, 480, 1).astype('float32')/255.0
     valid_mask_y = valid_mask_y.reshape(len(valid_mask_y), 288, 480, 1).astype('float32')/255.0
     model = UNet()
-    model.compile(optimizer = Adam(lr = 1e-4), loss = 'binary_crossentropy', metrics = ['accuracy'])
+    model.compile(optimizer = Adam(lr =1e-4), loss = 'binary_crossentropy', metrics = ['accuracy'])
     model.summary()
-    results = model.fit(train_x, train_mask_y, validation_data=(valid_x, valid_mask_y), epochs=35, batch_size=16, verbose=1)
-    model.save("UNetv3.h5")
+    results = model.fit(train_x, train_mask_y, validation_data=(valid_x, valid_mask_y), epochs=150, batch_size=16, verbose=1)
+    model.save("UNetv8.h5")
 
-    fig, ax = plt.subplots(2, 2, figsize=(10, 7))
+    fig, ax = plt.subplots(2, 2, figsize=(10, 200))
 
     ax[0, 0].set_title('loss')
     ax[0, 0].plot(results.history['loss'], 'r')
@@ -167,6 +161,7 @@ if __name__ == "__main__":
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
     plt.show()
+    plt.savefig('acc2.png')
     # summarize history for loss
     plt.plot(results.history['loss'])
     plt.plot(results.history['val_loss'])
@@ -174,4 +169,4 @@ if __name__ == "__main__":
     plt.ylabel('loss')
     plt.xlabel('epoch')
     plt.legend(['train', 'test'], loc='upper left')
-    plt.show()
+    plt.savefig('loss2.png')
