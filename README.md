@@ -1,9 +1,16 @@
 # UnetPointAnnotationSegmentation
-
+## Model
 ![Model](./img/model.png)
-
+## MaskingTask
 ![MaskingTask](./img/maskingTask.JPG)
-
+## refine mask (Threshold: RGB 220)
+![mask] (./img/mask.png)
+## removeTarget(Background)
+![removeTarget](./img/remove.png)
+## target(foreground)
+![target](./img/target.png)
+## Background blur
+![outFocusing](./img/outFoucsing.png)
 # Model Result Kaggle: https://www.kaggle.com/parkwonro/pointannotation-and-segmentation-model-result
 
 # Used Dataset
