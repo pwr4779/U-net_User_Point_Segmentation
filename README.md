@@ -1,6 +1,6 @@
 # UnetPointAnnotationSegmentation
 
-![Model](model.PNG)
+![Model](./img/model.png)
 
 # Model Result Kaggle: https://www.kaggle.com/parkwonro/pointannotation-and-segmentation-model-result
 
