@@ -2,7 +2,7 @@
 
 ![Model](./img/model.png)
 
-![MaskingTask](./img/maskingTask.png)
+![MaskingTask](./img/maskingTask.jpg)
 
 # Model Result Kaggle: https://www.kaggle.com/parkwonro/pointannotation-and-segmentation-model-result
 
