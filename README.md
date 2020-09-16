@@ -1,5 +1,7 @@
 # UnetPointAnnotationSegmentation
 
+![Model](.model.png)
+
 # Model Result Kaggle: https://www.kaggle.com/parkwonro/pointannotation-and-segmentation-model-result
 
 # Used Dataset
